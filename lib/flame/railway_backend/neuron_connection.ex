@@ -3,7 +3,7 @@ defmodule FLAME.RailwayBackend.NeuronConnection do
 
   defmodule Json do
     @moduledoc false
-    def decode(data) do
+    def decode(data, _opts) do
       try do
         FLAME.Parser.JSON.decode!(data)
       catch
@@ -13,7 +13,7 @@ defmodule FLAME.RailwayBackend.NeuronConnection do
       end
     end
 
-    def encode(term) do
+    def encode(term, _opts) do
       try do
         FLAME.Parser.JSON.encode!(term)
       catch
