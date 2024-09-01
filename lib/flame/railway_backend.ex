@@ -104,7 +104,14 @@ defmodule FLAME.RailwayBackend do
       |> FLAME.Parent.new(self(), __MODULE__, state.release_name, "RAILWAY_PRIVATE_DOMAIN")
       |> FLAME.Parent.encode()
 
-    new_env = Map.merge(state.env, %{"PHX_SERVER" => "false", "FLAME_PARENT" => encoded_parent})
+    new_env =
+      Map.merge(state.env, %{
+        "PHX_SERVER" => "false",
+        "FLAME_PARENT" => encoded_parent,
+        "RELEASE_NODE" => "#{state.release_name}@${{ RAILWAY_PRIVATE_DOMAIN }}",
+        "RELEASE_DISTRIBUTION" => "name",
+        "RELEASE_COOKIE" => Atom.to_string(:erlang.get_cookie())
+      })
 
     state = %RailwayBackend{state | env: new_env, parent_ref: parent_ref}
     {:ok, state}
@@ -112,7 +119,10 @@ defmodule FLAME.RailwayBackend do
 
   @env_desc %{
     "PHX_SERVER" => "Whether to run the Phoenix endpoint",
-    "FLAME_PARENT" => "The encoded FLAME.Parent struct for a spawned node"
+    "FLAME_PARENT" => "The encoded FLAME.Parent struct for a spawned node",
+    "RELEASE_NODE" => "The node name of the application in OTP distribution",
+    "RELEASE_DISTRIBUTION" => "The mode of OTP distribution",
+    "RELEASE_COOKIE" => "The secret cookie for authenticating OTP distribution"
   }
 
   @impl true
