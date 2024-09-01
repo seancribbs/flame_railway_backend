@@ -26,14 +26,18 @@ defmodule FLAME.RailwayBackend do
             parent_ref: nil,
             runner_node_name: nil,
             runner_service_id: nil,
-            remote_terminator_pid: nil
+            remote_terminator_pid: nil,
+            log: nil,
+            terminator_sup: nil
 
   @valid_opts [
     :project_id,
     :environment_id,
     :release_name,
     :source,
-    :env
+    :env,
+    :terminator_sup,
+    :log
   ]
 
   @create_service_query """
