@@ -117,27 +117,14 @@ defmodule FLAME.RailwayBackend do
     {:ok, state}
   end
 
-  @env_desc %{
-    "PHX_SERVER" => "Whether to run the Phoenix endpoint",
-    "FLAME_PARENT" => "The encoded FLAME.Parent struct for a spawned node",
-    "RELEASE_NODE" => "The node name of the application in OTP distribution",
-    "RELEASE_DISTRIBUTION" => "The mode of OTP distribution",
-    "RELEASE_COOKIE" => "The secret cookie for authenticating OTP distribution"
-  }
-
   @impl true
   def remote_boot(%RailwayBackend{parent_ref: parent_ref} = state) do
-    variables =
-      for {key, value} <- state.env, into: %{} do
-        {key, %{defaultValue: value, description: Map.get(@env_desc, key, "user supplied")}}
-      end
-
     input = %{
       name: state.service_name,
       environmentId: state.environment_id,
       projectId: state.project_id,
       templateServiceId: state.service_id,
-      variables: variables
+      variables: state.env
     }
 
     opts = [log: state.log] ++ @neuron_opts
