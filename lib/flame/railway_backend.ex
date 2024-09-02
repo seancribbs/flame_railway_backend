@@ -26,8 +26,7 @@ defmodule FLAME.RailwayBackend do
             runner_node_name: nil,
             runner_service_id: nil,
             remote_terminator_pid: nil,
-            log: nil,
-            terminator_sup: nil
+            log: nil
 
   @valid_opts [
     :project_id,
@@ -35,7 +34,6 @@ defmodule FLAME.RailwayBackend do
     :release_name,
     :source,
     :env,
-    :terminator_sup,
     :log
   ]
 
@@ -83,7 +81,7 @@ defmodule FLAME.RailwayBackend do
     provided_opts =
       conf
       |> Keyword.merge(opts)
-      |> Keyword.validate!(@valid_opts)
+      |> Keyword.take(@valid_opts)
 
     %RailwayBackend{} = state = Map.merge(default, Map.new(provided_opts))
 
@@ -145,8 +143,8 @@ defmodule FLAME.RailwayBackend do
           {^parent_ref, {:remote_up, remote_terminator_pid}} ->
             remote_terminator_pid
         after
-          30_000 ->
-            Logger.error("failed to start service within 30s")
+          60_000 ->
+            Logger.error("failed to start service within 60s")
             exit(:timeout)
         end
 
