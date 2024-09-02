@@ -41,6 +41,10 @@ defmodule FLAME.RailwayBackend.NeuronConnection do
   def call(body, options) do
     request_opts = Keyword.take(options, ~w{headers query opts}a)
 
+    if Keyword.get(options, :log) do
+      Logger.log(options[:log], "GRAPHQL REQUEST: #{inspect(body)}")
+    end
+
     case Client.post("", body, request_opts) do
       {:ok, %Tesla.Env{status: 200} = env} ->
         {:ok, build_response(env)}

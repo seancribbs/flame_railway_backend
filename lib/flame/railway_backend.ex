@@ -144,7 +144,7 @@ defmodule FLAME.RailwayBackend do
       variables: variables
     }
 
-    case Neuron.query(@create_service_query, %{input: input}, @neuron_opts) do
+    case Neuron.query(@create_service_query, %{input: input}, [log: state.log] ++ @neuron_opts) do
       {:ok, %{body: %{"data" => %{"serviceCreate" => service}}}} ->
         remote_terminator_pid =
           receive do
@@ -203,7 +203,7 @@ defmodule FLAME.RailwayBackend do
         remote_terminator_pid: nil
     }
 
-    case Neuron.query(@delete_service_query, variables, @neuron_opts) do
+    case Neuron.query(@delete_service_query, variables, [log: state.log] ++ @neuron_opts) do
       {:ok, %{body: %{"data" => %{"serviceDelete" => true}}}} ->
         :ok
 
