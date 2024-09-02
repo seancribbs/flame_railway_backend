@@ -39,7 +39,7 @@ defmodule FLAME.RailwayBackend.NeuronConnection do
     plug Tesla.Middleware.BearerAuth, token: System.fetch_env!("RAILWAY_TOKEN")
     plug Tesla.Middleware.Headers, [{"content-type", "application/json"}]
     plug Tesla.Middleware.DecodeJson, engine: FLAME.RailwayBackend.NeuronConnection.Json
-    plug Tesla.Middleware.Logger, debug: true
+    plug Tesla.Middleware.Logger
 
     def opentelemetry_opts do
       [
