@@ -111,7 +111,7 @@ defmodule FLAME.RailwayBackend do
       Map.merge(state.env, %{
         "PHX_SERVER" => "false",
         "FLAME_PARENT" => encoded_parent,
-        "RELEASE_NODE" => "#{state.release_name}@${{ RAILWAY_PRIVATE_DOMAIN }}",
+        "RELEASE_NODE" => "#{state.release_name}@#{state.service_name}.railway.internal",
         "RELEASE_DISTRIBUTION" => "name",
         "RELEASE_COOKIE" => Atom.to_string(:erlang.get_cookie())
       })
