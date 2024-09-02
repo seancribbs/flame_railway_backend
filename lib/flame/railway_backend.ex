@@ -10,7 +10,6 @@ defmodule FLAME.RailwayBackend do
            only: [
              :project_id,
              :environment_id,
-             :service_id,
              :release_name,
              :service_name,
              :runner_node_name,
@@ -20,9 +19,9 @@ defmodule FLAME.RailwayBackend do
   defstruct project_id: nil,
             environment_id: nil,
             release_name: nil,
-            service_id: nil,
             service_name: nil,
             env: %{},
+            source: %{},
             parent_ref: nil,
             runner_node_name: nil,
             runner_service_id: nil,
@@ -79,7 +78,6 @@ defmodule FLAME.RailwayBackend do
       project_id: System.get_env("RAILWAY_PROJECT_ID"),
       environment_id: System.get_env("RAILWAY_ENVIRONMENT_ID"),
       release_name: System.get_env("RELEASE_NAME"),
-      service_id: System.get_env("RAILWAY_SERVICE_ID")
     }
 
     provided_opts =
@@ -96,6 +94,11 @@ defmodule FLAME.RailwayBackend do
         raise ArgumentError, "missing :#{key} config for #{inspect(__MODULE__)}"
       end
     end
+
+    unless state.source[:image] || state.source[:repo] do
+      raise ArgumentError, "missing :source config for #{inspect(__MODULE__)} - either :image or :repo is required"
+    end
+
 
     parent_ref = make_ref()
 
@@ -123,7 +126,7 @@ defmodule FLAME.RailwayBackend do
       name: state.service_name,
       environmentId: state.environment_id,
       projectId: state.project_id,
-      templateServiceId: state.service_id,
+      source: state.source,
       variables: state.env
     }
 
