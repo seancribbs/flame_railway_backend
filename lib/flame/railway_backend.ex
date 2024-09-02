@@ -75,7 +75,7 @@ defmodule FLAME.RailwayBackend do
     default = %RailwayBackend{
       project_id: System.get_env("RAILWAY_PROJECT_ID"),
       environment_id: System.get_env("RAILWAY_ENVIRONMENT_ID"),
-      release_name: System.get_env("RELEASE_NAME"),
+      release_name: System.get_env("RELEASE_NAME")
     }
 
     provided_opts =
@@ -94,9 +94,9 @@ defmodule FLAME.RailwayBackend do
     end
 
     unless state.source[:image] || state.source[:repo] do
-      raise ArgumentError, "missing :source config for #{inspect(__MODULE__)} - either :image or :repo is required"
+      raise ArgumentError,
+            "missing :source config for #{inspect(__MODULE__)} - either :image or :repo is required"
     end
-
 
     parent_ref = make_ref()
 
@@ -130,32 +130,26 @@ defmodule FLAME.RailwayBackend do
 
     opts = [log: state.log] ++ @neuron_opts
 
-    with {:ok, %{body: %{"data" => %{"serviceCreate" => service}}}} <-
-           Neuron.query(@create_service_query, %{input: input}, opts),
-         {:ok, %{body: %{"data" => %{"serviceInstanceDeploy" => true}}}} <-
-           Neuron.query(
-             @deploy_service_query,
-             %{environmentId: state.environment_id, serviceId: service["id"]},
-             opts
-           ) do
-      remote_terminator_pid =
-        receive do
-          {^parent_ref, {:remote_up, remote_terminator_pid}} ->
-            remote_terminator_pid
-        after
-          60_000 ->
-            Logger.error("failed to start service within 60s")
-            exit(:timeout)
-        end
+    case Neuron.query(@create_service_query, %{input: input}, opts) do
+      {:ok, %{body: %{"data" => %{"serviceCreate" => service}}}} ->
+        remote_terminator_pid =
+          receive do
+            {^parent_ref, {:remote_up, remote_terminator_pid}} ->
+              remote_terminator_pid
+          after
+            60_000 ->
+              Logger.error("failed to start service within 60s")
+              exit(:timeout)
+          end
 
-      {:ok, remote_terminator_pid,
-       %RailwayBackend{
-         state
-         | runner_service_id: service["id"],
-           runner_node_name: node(remote_terminator_pid),
-           remote_terminator_pid: remote_terminator_pid
-       }}
-    else
+        {:ok, remote_terminator_pid,
+         %RailwayBackend{
+           state
+           | runner_service_id: service["id"],
+             runner_node_name: node(remote_terminator_pid),
+             remote_terminator_pid: remote_terminator_pid
+         }}
+
       err ->
         {:error, err}
     end
