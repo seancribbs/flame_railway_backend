@@ -1,11 +1,16 @@
 defmodule FLAME.RailwayBackend.NeuronConnection do
   @moduledoc false
+  require Logger
 
   defmodule Json do
     @moduledoc false
+
+    defdelegate decode!(data), to: FLAME.Parser.JSON
+    defdelegate encode!(term), to: FLAME.Parser.JSON
+
     def decode(data, _opts) do
       try do
-        FLAME.Parser.JSON.decode!(data)
+        decode!(data)
       catch
         kind, value -> {:error, {kind, value}}
       else
@@ -15,7 +20,7 @@ defmodule FLAME.RailwayBackend.NeuronConnection do
 
     def encode(term, _opts) do
       try do
-        FLAME.Parser.JSON.encode!(term)
+        encode!(term)
       catch
         kind, value -> {:error, {kind, value}}
       else
@@ -32,7 +37,16 @@ defmodule FLAME.RailwayBackend.NeuronConnection do
          System.get_env("RAILWAY_API_URL", "https://backboard.railway.app/graphql/v2")
 
     plug Tesla.Middleware.BearerAuth, token: System.fetch_env!("RAILWAY_TOKEN")
+    plug Tesla.Middleware.Headers, [{"content-type", "application/json"}]
     plug Tesla.Middleware.DecodeJson, engine: FLAME.RailwayBackend.NeuronConnection.Json
+    plug Tesla.Middleware.Logger, debug: true
+
+    def opentelemetry_opts do
+      [
+        # Disable trace propagation for talking to a third-party API
+        propagator: :none
+      ]
+    end
   end
 
   @behaviour Neuron.Connection
