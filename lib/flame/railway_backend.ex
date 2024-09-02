@@ -89,7 +89,7 @@ defmodule FLAME.RailwayBackend do
 
     state = %RailwayBackend{state | service_name: "#{state.release_name}-flame-#{rand_id(10)}"}
 
-    for key <- [:project_id, :environment_id, :release_name, :env, :service_id] do
+    for key <- [:project_id, :environment_id, :release_name, :env, :source] do
       unless Map.get(state, key) do
         raise ArgumentError, "missing :#{key} config for #{inspect(__MODULE__)}"
       end
